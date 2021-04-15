@@ -1,7 +1,5 @@
 import datetime as dt
 
-import date_converter
-
 
 class Calculator:
     def __init__(self, limit):
@@ -82,9 +80,9 @@ class Record:
         self.comment = comment
         self.date = dt.date.today()
         if date:
-            date = date_converter.string_to_date(date, '%d.%m.%Y')
+            date = dt.datetime.strptime(date, '%d.%m.%Y')
 
-            self.date = date
+            self.date = date.date()
 
     def __str__(self):
         return f'{self.amount} | {self.comment} | {self.date}'
