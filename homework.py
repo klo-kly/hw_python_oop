@@ -1,6 +1,6 @@
 import datetime as dt
 
-from easy_date import convert_from_string
+import date_converter
 
 
 class Calculator:
@@ -12,6 +12,10 @@ class Calculator:
         self.records.append(record)
 
     def get_today_stats(self):
+        today = dt.date.today()
+        return sum([i.amount for i in self.records if today == i.date])
+
+    def get_rest_limit(self):
         today = dt.date.today()
         return (
             self.limit
@@ -48,10 +52,10 @@ class CashCalculator(Calculator):
         }
 
         cash_remained = round(
-            self.get_today_stats() / currency_dict[currency][0], 2
+            self.get_rest_limit() / currency_dict[currency][0], 2
         )
 
-        if self.limit > - self.get_today_stats() - self.limit:
+        if self.limit > self.get_today_stats():
             return ('На сегодня осталось '
                     f'{cash_remained} {currency_dict[currency][1]}')
         elif self.limit == self.get_today_stats():
@@ -66,7 +70,7 @@ class CaloriesCalculator(Calculator):
         if self.limit > self.get_today_stats():
             return ('Сегодня можно съесть что-нибудь ещё, '
                     'но с общей калорийностью '
-                    f'не более {self.get_today_stats()} кКал')
+                    f'не более {self.get_rest_limit()} кКал')
         else:
             return 'Хватит есть!'
 
@@ -78,7 +82,8 @@ class Record:
         self.comment = comment
         self.date = dt.date.today()
         if date:
-            date = convert_from_string(date, '%d.%m.%Y', '%Y-%m-%d', date)
+            date = date_converter.string_to_date(date, '%d.%m.%Y')
+
             self.date = date
 
     def __str__(self):
@@ -96,6 +101,6 @@ if __name__ == '__main__':
     # и к этой записи тоже дата должна добавиться автоматически
     cash_calculator.add_record(Record(amount=300, comment='Серёге за обед'))
     # а тут пользователь указал дату, сохраняем её
-    cash_calculator.add_record(Record(amount=300, comment='бар в Танин др'))
+    cash_calculator.add_record(Record(amount=1300, comment='бар в Танин др'))
 
-    print(cash_calculator.get_today_cash_remained('usd'))
+    print(cash_calculator.get_today_cash_remained('rub'))
