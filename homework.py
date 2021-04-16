@@ -17,11 +17,7 @@ class Calculator:
         return self.limit - self.get_today_stats()
 
     def show_records(self):
-        s = ''
-        for i in self.records:
-            s += str(i)
-            s += '\n'
-        return s
+        return '\n'.join(map(str, self.records))
 
     def get_week_stats(self):
         week = dt.timedelta(7)
@@ -37,23 +33,26 @@ class CashCalculator(Calculator):
 
     def get_today_cash_remained(self, currency):
 
+        rest_limit = self.get_rest_limit()
+
+        if rest_limit == 0:
+            return 'Денег нет, держись'
+
         currency_dict = {
             'rub': (1, 'руб'),
             'usd': (self.USD_RATE, 'USD'),
             'eur': (self.EURO_RATE, 'Euro')
         }
 
-        currency_name = currency_dict[currency][1]
+        currency_rate, currency_name = currency_dict[currency]
 
         cash_remained = round(
-            self.get_rest_limit() / currency_dict[currency][0], 2
+            rest_limit / currency_rate, 2
         )
 
         if cash_remained > 0:
             return ('На сегодня осталось '
                     f'{cash_remained} {currency_name}')
-        elif cash_remained == 0:
-            return 'Денег нет, держись'
         else:
             cash_remained = abs(cash_remained)
             return ('Денег нет, держись: твой долг - '
@@ -62,12 +61,12 @@ class CashCalculator(Calculator):
 
 class CaloriesCalculator(Calculator):
     def get_calories_remained(self):
-        if self.get_rest_limit() > 0:
+        rest_limit = self.get_rest_limit()
+        if rest_limit > 0:
             return ('Сегодня можно съесть что-нибудь ещё, '
                     'но с общей калорийностью '
-                    f'не более {self.get_rest_limit()} кКал')
-        else:
-            return 'Хватит есть!'
+                    f'не более {rest_limit} кКал')
+        return 'Хватит есть!'
 
 
 class Record:
@@ -88,7 +87,7 @@ class Record:
 
 if __name__ == '__main__':
     # создадим калькулятор денег с дневным лимитом 1000
-    cash_calculator = CashCalculator(1000)
+    cash_calculator = CashCalculator(17405)
 
     # дата в параметрах не указана,
     # так что по умолчанию к записи
@@ -98,5 +97,5 @@ if __name__ == '__main__':
     cash_calculator.add_record(Record(amount=300, comment='Серёге за обед'))
     # а тут пользователь указал дату, сохраняем её
     cash_calculator.add_record(Record(amount=1300, comment='бар в Танин др'))
-
-    print(cash_calculator.get_today_cash_remained('rub'))
+    print(cash_calculator.show_records())
+    print(cash_calculator.get_today_cash_remained('usd'))
