@@ -14,11 +14,7 @@ class Calculator:
         return sum([i.amount for i in self.records if today == i.date])
 
     def get_rest_limit(self):
-        today = dt.date.today()
-        return (
-            self.limit
-            - sum([i.amount for i in self.records if today == i.date])
-        )
+        return self.limit - self.get_today_stats()
 
     def show_records(self):
         s = ''
@@ -41,31 +37,32 @@ class CashCalculator(Calculator):
 
     def get_today_cash_remained(self, currency):
 
-        cash_remained = 0
-
         currency_dict = {
             'rub': (1, 'руб'),
             'usd': (self.USD_RATE, 'USD'),
             'eur': (self.EURO_RATE, 'Euro')
         }
 
+        currency_name = currency_dict[currency][1]
+
         cash_remained = round(
             self.get_rest_limit() / currency_dict[currency][0], 2
         )
 
-        if self.limit > self.get_today_stats():
+        if cash_remained > 0:
             return ('На сегодня осталось '
-                    f'{cash_remained} {currency_dict[currency][1]}')
-        elif self.limit == self.get_today_stats():
+                    f'{cash_remained} {currency_name}')
+        elif cash_remained == 0:
             return 'Денег нет, держись'
         else:
+            cash_remained = abs(cash_remained)
             return ('Денег нет, держись: твой долг - '
-                    f'{- cash_remained} {currency_dict[currency][1]}')
+                    f'{cash_remained} {currency_name}')
 
 
 class CaloriesCalculator(Calculator):
     def get_calories_remained(self):
-        if self.limit > self.get_today_stats():
+        if self.get_rest_limit() > 0:
             return ('Сегодня можно съесть что-нибудь ещё, '
                     'но с общей калорийностью '
                     f'не более {self.get_rest_limit()} кКал')
@@ -78,8 +75,9 @@ class Record:
     def __init__(self, amount, comment, date=None):
         self.amount = amount
         self.comment = comment
-        self.date = dt.date.today()
-        if date:
+        if date is None:
+            self.date = dt.date.today()
+        else:
             date = dt.datetime.strptime(date, '%d.%m.%Y')
 
             self.date = date.date()
