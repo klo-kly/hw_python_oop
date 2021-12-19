@@ -86,16 +86,9 @@ class Record:
 
 
 if __name__ == '__main__':
-    # создадим калькулятор денег с дневным лимитом 1000
     cash_calculator = CashCalculator(17405)
-
-    # дата в параметрах не указана,
-    # так что по умолчанию к записи
-    # должна автоматически добавиться сегодняшняя дата
     cash_calculator.add_record(Record(amount=145, comment='кофе'))
-    # и к этой записи тоже дата должна добавиться автоматически
     cash_calculator.add_record(Record(amount=300, comment='Серёге за обед'))
-    # а тут пользователь указал дату, сохраняем её
     cash_calculator.add_record(Record(amount=1300, comment='бар в Танин др'))
     print(cash_calculator.show_records())
     print(cash_calculator.get_today_cash_remained('usd'))
